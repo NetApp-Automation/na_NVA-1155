@@ -1,0 +1,11 @@
+---
+- name: Oracle grid infrastructure installation
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: grid_install}
+  tags:
+  - grid_install

@@ -1,0 +1,32 @@
+---
+- name: Configure oracle user env - add oracle_home variable
+  lineinfile: dest="/home/{{ oracle_user }}/.bashrc" line="export ORACLE_HOME={{ oracle_home }}"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - set_oracle_home
+
+- name: Configure oracle user env - add oracle_sid variable - RAC
+  when: db_instance == "RAC"
+  lineinfile: dest="/home/{{ oracle_user }}/.bashrc" line="export ORACLE_SID={{ ins_sid }}"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - set_oracle_sid
+
+- name: Configure oracle user env - add oracle exe to PATH
+  lineinfile: dest="/home/{{ oracle_user }}/.bashrc" line="export PATH=$PATH:$ORACLE_HOME/bin"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - set_oracle_path
+
+- name: Update oratab to start oracle_sid
+  when: db_instance == "RAC"
+  lineinfile:
+    dest: /etc/oratab
+    regexp: "^{{ oracle_sid }}:{{ oracle_home }}:Y"
+    line: "{{ oracle_sid }}:{{ oracle_home }}:Y"
+  become: true
+  tags:
+    - set_oratab

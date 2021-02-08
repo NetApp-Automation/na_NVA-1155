@@ -1,0 +1,72 @@
+#############################################################################
+###### Oracle 19c deployment env specific vars - version: Feb/2021 AJC ######
+#############################################################################
+
+####################################
+### Linux env specific variables ###
+####################################
+
+# Half of node  memory size divided by 2mb
+hugepages_nr: 58982
+
+######################################################
+### Grid env specific install and config variables ###
+######################################################
+
+cluster_scan_name: rtprac-scan
+scan_port: 1521
+cluster_pub_ip:
+  - {ip: 10.61.180.151, hostname: b200-ora-01}
+  - {ip: 10.61.180.152, hostname: b200-ora-02}
+  - {ip: 10.61.180.153, hostname: b200-ora-03}
+  - {ip: 10.61.180.154, hostname: b200-ora-04}
+  - {ip: 10.61.180.155, hostname: b200-ora-05}
+  - {ip: 10.61.180.156, hostname: b200-ora-06}
+  - {ip: 10.61.180.157, hostname: b200-ora-07}
+  - {ip: 10.61.180.158, hostname: b200-ora-08}
+cluster_pri_ip:
+  - {ip: 172.21.101.151, hostname: b200-ora-01-pri}
+  - {ip: 172.21.101.152, hostname: b200-ora-02-pri}
+  - {ip: 172.21.101.153, hostname: b200-ora-03-pri}
+  - {ip: 172.21.101.154, hostname: b200-ora-04-pri}
+  - {ip: 172.21.101.155, hostname: b200-ora-05-pri}
+  - {ip: 172.21.101.156, hostname: b200-ora-06-pri}
+  - {ip: 172.21.101.157, hostname: b200-ora-07-pri}
+  - {ip: 172.21.101.158, hostname: b200-ora-08-pri}
+cluster_vip_ip:
+  - {ip: 10.61.180.159, hostname: b200-ora-01-vip}
+  - {ip: 10.61.180.160, hostname: b200-ora-02-vip}
+  - {ip: 10.61.180.161, hostname: b200-ora-03-vip}
+  - {ip: 10.61.180.162, hostname: b200-ora-04-vip}
+  - {ip: 10.61.180.163, hostname: b200-ora-05-vip}
+  - {ip: 10.61.180.164, hostname: b200-ora-06-vip}
+  - {ip: 10.61.180.165, hostname: b200-ora-07-vip}
+  - {ip: 10.61.180.166, hostname: b200-ora-08-vip}
+cluster_scan_ip:
+  - {ip: 10.61.180.167, hostname: rtprac-scan}
+  - {ip: 10.61.180.168, hostname: rtprac-scan}
+  - {ip: 10.61.180.169, hostname: rtprac-scan}
+
+cluster_name: rtprac
+cluster_domain: cie.netapp.com
+grid_cluster_nodes: b200-ora-01:b200-ora-01-vip:HUB,b200-ora-02:b200-ora-02-vip:HUB,b200-ora-03:b200-ora-03-vip:HUB,b200-ora-04:b200-ora-04-vip:HUB,b200-ora-05:b200-ora-05-vip:HUB,b200-ora-06:b200-ora-06-vip:HUB,b200-ora-07:b200-ora-07-vip:HUB,b200-ora-08:b200-ora-08-vip:HUB
+network_interface_list: ens5f0:10.61.180.0:1,ens5f1:172.21.101.0:5
+
+####################################################
+### DB env specific install and config variables ###
+####################################################
+
+cluster_nodes: b200-ora-01,b200-ora-02,b200-ora-03,b200-ora-04,b200-ora-05,b200-ora-06,b200-ora-07,b200-ora-08
+
+# Number of pluggable database per container instance
+oracle_sid: cdb3
+pdb_num: 3 
+pdb_name: pdb
+
+# CDB is created with SGA at 75% of memory_limit, MB
+memory_limit: 24576
+initial_pwd_all: NetApp#23
+
+em_configuration: DBEXPRESS
+em_express_port: 5503
+

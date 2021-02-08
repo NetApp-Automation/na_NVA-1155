@@ -1,0 +1,36 @@
+---
+# This file contains standard parameters that apply to most ontap cluster as defaults.
+# Variables in this default parameter file generally do not need to be changed under normal circumstances.
+# They can however be changed like any other parameters in ontap_main.yml file if necessary. 
+
+# Following two variables are used in a task to ensure auto revert for cluster management LIF is set to True.
+cluster_mgmt_auto_revert: true
+cluster_mgmt_interface: cluster_mgmt
+
+#List of aggregates for SVMs
+aggr_list: []
+
+#Name of SVMs created for Oracle 19c deployment
+infrastructure_svm: infra_svm
+oracle_svm: ora19c_svm
+
+# Root volumes for SVMs
+infra_root_volume: infra_svm_root
+ora_root_volume: ora19c_svm_root
+
+#Create root mirror volumes for infra SVM
+infra_mirror_volumes:
+  - {mirror_volume: infra_svm_root_m01}
+  - {mirror_volume: infra_svm_root_m02}
+
+#Create root mirror volumes for ora SVM
+ora_mirror_volumes:
+  - {mirror_volume: ora19c_svm_root_m01}
+  - {mirror_volume: ora19c_svm_root_m02}
+
+#Job Schedule
+job_schedule:
+  - {job_name: 30min,job_minutes: 30}
+
+
+

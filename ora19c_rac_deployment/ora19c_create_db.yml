@@ -1,0 +1,22 @@
+---
+- name: Create Oracle databases
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: create_database}
+  tags:
+  - create_database
+
+- name: Post installation configuration
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: postinst_config}
+  tags:
+  - postinst_config

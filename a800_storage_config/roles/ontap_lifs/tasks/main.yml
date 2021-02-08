@@ -1,0 +1,153 @@
+---
+- name: Create infra SVM FCP data LIF(s) on Nodes
+  na_ontap_interface: 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    state: present 
+    vserver: "{{infrastructure_svm}}" 
+    role: data 
+    protocols: fcp 
+    home_node: "{{item.home_node}}" 
+    home_port: "{{item.home_port}}"
+    interface_name: "{{item.name}}" 
+    admin_status: up 
+    https: true 
+    validate_certs: false
+  with_items:
+    - "{{infra_fcp_lifs}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - infra_fcp_lif
+
+- name: Create ora SVM FCP data LIF(s) on Nodes
+  na_ontap_interface:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    role: data
+    protocols: fcp
+    home_node: "{{item.home_node}}"
+    home_port: "{{item.home_port}}"
+    interface_name: "{{item.name}}"
+    admin_status: up
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ora_fcp_lifs}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - ora_fcp_lif
+
+- name: Create mgmt LIF for infra SVM Management
+  na_ontap_interface: 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    state: present 
+    vserver: "{{infrastructure_svm}}" 
+    role: data 
+    protocols: none 
+    home_node: "{{nodes[0]}}" 
+    home_port: "{{item.home_port}}" 
+    address: "{{item.address}}" 
+    netmask: "{{item.netmask}}" 
+    interface_name: "{{item.lif_name}}" 
+    admin_status: up 
+    failover_policy: broadcast-domain-wide 
+    firewall_policy: mgmt 
+    is_auto_revert: true 
+    https: true 
+    validate_certs: false
+  with_items:
+    - "{{infra_svm_specs}}"
+  tags:
+    - ontap_svm_mgmt_lif
+
+- name: Create a default route for infra SVM mgmt
+  na_ontap_net_routes:
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    destination: "0.0.0.0/0"
+    gateway: "{{item.gateway}}"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{infra_svm_specs}}"
+  tags:
+    - infra_svm_default_route
+
+- name: Configure DNS for infra SVM mgmt
+  na_ontap_dns: 
+    state: present 
+    vserver: "{{infrastructure_svm}}" 
+    nameservers: "{{dns_server}}" 
+    domains: "{{dns_domain}}" 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  tags:
+    - infra_svm_config_dns
+
+- name: Create LIF for ora SVM Management
+  na_ontap_interface:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    role: data
+    protocols: none
+    home_node: "{{nodes[0]}}"
+    home_port: "{{item.home_port}}"
+    address: "{{item.address}}"
+    netmask: "{{item.netmask}}"
+    interface_name: "{{item.lif_name}}"
+    admin_status: up
+    failover_policy: broadcast-domain-wide
+    firewall_policy: mgmt
+    is_auto_revert: true
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ora_svm_specs}}"
+  tags:
+    - ora_svm_mgmt_lif
+
+- name: Create a default route for ora SVM mgmt
+  na_ontap_net_routes:
+    state: present
+    vserver: "{{oracle_svm}}"
+    destination: "0.0.0.0/0"
+    gateway: "{{item.gateway}}"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ora_svm_specs}}"
+  tags:
+    - ora_svm_default_route
+
+- name: Configure DNS for ora SVM mgmt
+  na_ontap_dns:
+    state: present
+    vserver: "{{oracle_svm}}"
+    nameservers: "{{dns_server}}"
+    domains: "{{dns_domain}}"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  tags:
+    - ora_svm_config_dns
+

@@ -1,0 +1,96 @@
+---
+# Role variables as per NetApp's prescriptive guidance
+# User's input for environment specific variables
+
+#Name of the ONTAP Cluster
+cluster_name: FlexPod-A800-01-02
+
+#Names of the Nodes in the ONTAP Cluster
+nodes: 
+ - FlexPod-A800-01-02-01
+ - FlexPod-A800-01-02-02
+nodes_ip:
+ - 10.61.184.192
+ - 10.61.184.195
+
+#Cluster authentification
+username: admin
+password: netapp1!
+
+#FCP Adapter Ports
+node_fcp_ports:
+  - 2a
+  - 2b
+  - 2c
+  - 2d
+
+# Network settings for the Service processor
+sp:
+  - {node: "FlexPod-A800-01-02-01", ip: "10.61.184.190", mask: "255.255.255.0", gateway: "10.61.184.1"}
+  - {node: "FlexPod-A800-01-02-02", ip: "10.61.184.191", mask: "255.255.255.0", gateway: "10.61.184.1"}
+
+#List the ONTAP Licenses for the different features that you need
+ontap_license:
+  - <License key for feature 1>
+  - <License key for feature 2>
+  - <License key for feature 3>
+
+#Details of the Data Aggregates that need to be created
+#If Aggregate creation takes longer, subsequent tasks of creating volumes may fail.
+#There should be enough disks already zeroed in the cluster, otherwise aggregate create will zero the disks and will take long time
+data_aggregates:
+  - {aggr_name: FlexPod_A800_01_02_01_NVME_SSD_1, diskcount: 11}
+  - {aggr_name: FlexPod_A800_01_02_02_NVME_SSD_1, diskcount: 11}
+
+#List the protocols that will need to be allowed on the Storage Virtual Machine
+#This variable is also used to configure other infrastructure components for appropriate protocols
+allowed_protocols:
+  - fcp
+
+#Details of the FCP LIFs to be created
+infra_fcp_lifs:
+  - {name: infra_lif_01_2a, home_port: 2a, home_node: "FlexPod-A800-01-02-01"}
+  - {name: infra_lif_01_2b, home_port: 2b, home_node: "FlexPod-A800-01-02-01"}
+  - {name: infra_lif_01_2c, home_port: 2c, home_node: "FlexPod-A800-01-02-01"}
+  - {name: infra_lif_01_2d, home_port: 2d, home_node: "FlexPod-A800-01-02-01"}
+  - {name: infra_lif_02_2a, home_port: 2a, home_node: "FlexPod-A800-01-02-02"}
+  - {name: infra_lif_02_2b, home_port: 2b, home_node: "FlexPod-A800-01-02-02"}
+  - {name: infra_lif_02_2c, home_port: 2c, home_node: "FlexPod-A800-01-02-02"}
+  - {name: infra_lif_02_2d, home_port: 2d, home_node: "FlexPod-A800-01-02-02"}
+
+ora_fcp_lifs:
+  - {name: ora_lif_01_2a, home_port: 2a, home_node: "FlexPod-A800-01-02-01"}
+  - {name: ora_lif_01_2b, home_port: 2b, home_node: "FlexPod-A800-01-02-01"}
+  - {name: ora_lif_01_2c, home_port: 2c, home_node: "FlexPod-A800-01-02-01"}
+  - {name: ora_lif_01_2d, home_port: 2d, home_node: "FlexPod-A800-01-02-01"}
+  - {name: ora_lif_02_2a, home_port: 2a, home_node: "FlexPod-A800-01-02-02"}
+  - {name: ora_lif_02_2b, home_port: 2b, home_node: "FlexPod-A800-01-02-02"}
+  - {name: ora_lif_02_2c, home_port: 2c, home_node: "FlexPod-A800-01-02-02"}
+  - {name: ora_lif_02_2d, home_port: 2d, home_node: "FlexPod-A800-01-02-02"}
+
+#FCP Adapter Port Speed
+fcp_port_speed: "32"
+
+#SVM Management LIF Details
+infra_svm_specs:
+  - {home_port: e0M, address: 10.61.184.196, netmask: 255.255.255.0, gateway: 10.61.184.1, lif_name: infra_svm_mgmt} 
+ora_svm_specs:
+  - {home_port: e0M, address: 10.61.184.197, netmask: 255.255.255.0, gateway: 10.61.184.1, lif_name: ora_svm_mgmt}
+
+#Password for vsadmin user of SVMs
+vsadmin_password: NetApp!23
+
+#Details for configuring NetApp AutoSupport - provide a working mailhost
+autosupport_vars:
+  mail_hosts: "mailhost"
+  noteto: "admin@netapp.com"
+
+dns_server: 10.61.184.251
+dns_domain: cie.netapp.com
+
+ntp_server:
+  - 0.us.pool.ntp.org
+  - 1.us.pool.ntp.org
+
+#Time zone names are from the L(tz database,https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+timezone: "US/Eastern"

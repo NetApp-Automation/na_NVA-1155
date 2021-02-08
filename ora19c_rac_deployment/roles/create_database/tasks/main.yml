@@ -1,0 +1,30 @@
+---
+- name: Generate response file for dbca and RAC configuration
+  when: db_instance == "RAC" and inventory_hostname == ansible_play_hosts_all[0]
+  template: src="dbca.rsp.{{ ora_version }}" dest="{{ installation_folder }}/dbca.rsp"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - gen_dbca_rsp_rac
+
+- name: Create database for RAC configuration
+  when: db_instance == "RAC" and inventory_hostname == ansible_play_hosts_all[0]
+  command: "{{ oracle_home }}/bin/dbca -silent -createDatabase -responseFile {{ installation_folder }}/dbca.rsp"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - exec_dbca_rac
+
+- name: Generate oracle net config file
+  template: src="netca.rsp.{{ ora_version }}" dest="{{ installation_folder }}/netca.rsp"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - gen_netca_rsp
+
+- name: Configure oracle net using netca
+  command: "{{ oracle_home }}/bin/netca -silent -responseFile {{ installation_folder }}/netca.rsp"
+  become: true
+  become_user: '{{ oracle_user }}'
+  tags:
+    - create_listener

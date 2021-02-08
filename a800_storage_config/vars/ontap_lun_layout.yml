@@ -1,0 +1,114 @@
+---
+#As a best practice, balance the luns of different types between two controller nodes and create up to 8 luns within a FlexVol volume
+
+#Oracle hosts initiator groups
+initiator_groups:
+  - {name: bin_ora_01, initiators: ["20:00:00:25:b5:8a:a0:00","20:00:00:25:b5:8a:a0:01","20:00:00:25:b5:8b:b0:00","20:00:00:25:b5:8b:b0:01"]}
+  - {name: bin_ora_02, initiators: ["20:00:00:25:b5:8a:a0:02","20:00:00:25:b5:8a:a0:03","20:00:00:25:b5:8b:b0:02","20:00:00:25:b5:8b:b0:03"]}
+  - {name: bin_ora_03, initiators: ["20:00:00:25:b5:8a:a0:04","20:00:00:25:b5:8a:a0:05","20:00:00:25:b5:8b:b0:04","20:00:00:25:b5:8b:b0:05"]}
+  - {name: bin_ora_04, initiators: ["20:00:00:25:b5:8a:a0:06","20:00:00:25:b5:8a:a0:07","20:00:00:25:b5:8b:b0:06","20:00:00:25:b5:8b:b0:07"]}
+  - {name: bin_ora_05, initiators: ["20:00:00:25:b5:8a:a0:08","20:00:00:25:b5:8a:a0:09","20:00:00:25:b5:8b:b0:08","20:00:00:25:b5:8b:b0:09"]}
+  - {name: bin_ora_06, initiators: ["20:00:00:25:b5:8a:a0:0a","20:00:00:25:b5:8a:a0:0b","20:00:00:25:b5:8b:b0:0a","20:00:00:25:b5:8b:b0:0b"]}
+  - {name: bin_ora_07, initiators: ["20:00:00:25:b5:8a:a0:0c","20:00:00:25:b5:8a:a0:0d","20:00:00:25:b5:8b:b0:0c","20:00:00:25:b5:8b:b0:0d"]}
+  - {name: bin_ora_08, initiators: ["20:00:00:25:b5:8a:a0:0e","20:00:00:25:b5:8a:a0:0f","20:00:00:25:b5:8b:b0:0e","20:00:00:25:b5:8b:b0:0f"]}
+
+ora_boot_luns:
+  - {type: linux, vol_name: boot_01, vol_size: 100, lun_name: boot_01_1, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_01, vol_size: 100, lun_name: boot_01_2, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_01, vol_size: 100, lun_name: boot_01_3, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_01, vol_size: 100, lun_name: boot_01_4, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_02, vol_size: 100, lun_name: boot_02_1, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_02, vol_size: 100, lun_name: boot_02_2, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_02, vol_size: 100, lun_name: boot_02_3, lun_size: 20, lun_count: 4} 
+  - {type: linux, vol_name: boot_02, vol_size: 100, lun_name: boot_02_4, lun_size: 20, lun_count: 4} 
+
+ora_binary_luns:
+  - {type: linux, vol_name: bin_01, vol_size: 50, lun_name: bin_01_1, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_01, vol_size: 50, lun_name: bin_01_2, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_01, vol_size: 50, lun_name: bin_01_3, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_01, vol_size: 50, lun_name: bin_01_4, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_02, vol_size: 50, lun_name: bin_02_1, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_02, vol_size: 50, lun_name: bin_02_2, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_02, vol_size: 50, lun_name: bin_02_3, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: bin_02, vol_size: 50, lun_name: bin_02_4, lun_size: 10, lun_count: 4}
+
+#Following are shared Oracle luns among oracle rac cluster nodes
+#Six crs luns to allow creating failgroups on each side of controller
+ora_crs_luns:
+  - {type: linux, vol_name: ora_crs_01, vol_size: 200, lun_name: ora_crs_01_1, lun_size: 50, lun_count: 3}
+  - {type: linux, vol_name: ora_crs_01, vol_size: 200, lun_name: ora_crs_01_2, lun_size: 50, lun_count: 3}
+  - {type: linux, vol_name: ora_crs_01, vol_size: 200, lun_name: ora_crs_01_3, lun_size: 50, lun_count: 3}
+  - {type: linux, vol_name: ora_crs_02, vol_size: 200, lun_name: ora_crs_02_1, lun_size: 50, lun_count: 3}
+  - {type: linux, vol_name: ora_crs_02, vol_size: 200, lun_name: ora_crs_02_2, lun_size: 50, lun_count: 3}
+  - {type: linux, vol_name: ora_crs_02, vol_size: 200, lun_name: ora_crs_02_3, lun_size: 50, lun_count: 3}
+
+#Data luns volumes 1,3,5 on node1 and 2,4,6 on node2 for a balanced placement
+ora_data_luns_01:
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_1, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_2, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_3, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_4, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_5, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_6, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_7, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_01, vol_size: 100, lun_name: data_01_8, lun_size: 10, lun_count: 8}
+
+ora_data_luns_02:
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_1, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_2, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_3, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_4, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_5, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_6, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_7, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_02, vol_size: 100, lun_name: data_02_8, lun_size: 10, lun_count: 8}
+  
+ora_data_luns_03:
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_1, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_2, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_3, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_4, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_5, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_6, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_7, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_03, vol_size: 100, lun_name: data_03_8, lun_size: 10, lun_count: 8}
+
+ora_data_luns_04:
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_1, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_2, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_3, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_4, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_5, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_6, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_7, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_04, vol_size: 100, lun_name: data_04_8, lun_size: 10, lun_count: 8}
+
+ora_data_luns_05:
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_1, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_2, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_3, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_4, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_5, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_6, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_7, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_05, vol_size: 100, lun_name: data_05_8, lun_size: 10, lun_count: 8}
+
+ora_data_luns_06:
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_1, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_2, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_3, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_4, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_5, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_6, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_7, lun_size: 10, lun_count: 8}
+  - {type: linux, vol_name: data_06, vol_size: 100, lun_name: data_06_8, lun_size: 10, lun_count: 8}
+
+ora_redo_luns:
+  - {type: linux, vol_name: redo_01, vol_size: 50, lun_name: redo_01_1, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_01, vol_size: 50, lun_name: redo_01_2, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_01, vol_size: 50, lun_name: redo_01_3, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_01, vol_size: 50, lun_name: redo_01_4, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_02, vol_size: 50, lun_name: redo_02_1, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_02, vol_size: 50, lun_name: redo_02_2, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_02, vol_size: 50, lun_name: redo_02_3, lun_size: 10, lun_count: 4}
+  - {type: linux, vol_name: redo_02, vol_size: 50, lun_name: redo_02_4, lun_size: 10, lun_count: 4}

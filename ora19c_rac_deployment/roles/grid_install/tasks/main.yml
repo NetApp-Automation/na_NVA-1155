@@ -1,0 +1,371 @@
+---
+- name: Create installer directory
+  file:
+    state: directory
+    path: '{{ installer_dir }}'
+    mode: 0777
+  become: true
+  become_user: '{{ grid_user }}'  
+  tags:
+    - cre_install_dir
+
+- name: Copy grid install file to installer directory
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  ansible.builtin.copy:
+    src: "/home/admin/Downloads/{{ installer_archives[0] }}"
+    dest: '{{ installer_dir }}'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - copy_grid_install_file
+
+- name: Copy grid RU 19.8 file to installer directory
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  ansible.builtin.copy:
+    src: "/home/admin/Downloads/{{ installer_archives[3] }}"
+    dest: '{{ installer_dir }}'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - copy_grid_ru_file
+
+- name: Copy latest OPatch file to installer directory
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  ansible.builtin.copy:
+    src: "/home/admin/Downloads/{{ installer_archives[5] }}"
+    dest: '{{ installer_dir }}'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - copy_opatch_file
+
+- name: Copy cvuqdisk file to installer directory
+  ansible.builtin.copy:
+    src: "/home/admin/Downloads/{{ installer_archives[2] }}"
+    dest: '{{ installer_dir }}'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - copy_cvudisk_file
+
+- name: Create grid user groups
+  group:
+    name: '{{ item.name }}'
+    gid: '{{ item.id }}'
+    state: present
+  become: true
+  with_items:
+    - '{{ grid_groups }}'
+  tags:
+    - cre_grid_groups
+
+- name: Create gid user with required groups
+  user:
+    name: '{{ grid_user }}'
+    uid: '{{ grid_user_id }}'
+    group: '{{ oracle_install_group }}'
+    groups: '{{ item.name }}'
+    append: yes
+    state: present
+  become: true
+  with_items:
+    - '{{ grid_groups }}'
+  tags:
+    - cre_grid_user
+
+- name: Add asmdba group to oracle user id
+  user:
+    name: '{{ oracle_user }}'
+    groups: '{{ grid_groups[0].name }}'
+    append: yes
+    state: present
+  become: true
+  tags:
+    - add_asmdba_to_oracle
+
+- name: Create grid base directory
+  ansible.builtin.file:
+    state: directory
+    path: '{{ grid_base }}'
+    owner: '{{ grid_user }}'
+    group: '{{ oracle_install_group }}'
+  become: true
+  tags:
+    - cre_grid_base
+
+- name: Create grid home directory
+  ansible.builtin.file:
+    state: directory
+    path: '{{ grid_home }}'
+    owner: '{{ grid_user }}'
+    group: '{{ oracle_install_group }}'
+  become: true
+  tags:
+    - cre_grid_home
+
+- name: Change software root dir ownership to grid user and set permission
+  ansible.builtin.file:
+    path: '{{ bin_mount_point }}'
+    owner: '{{ grid_user }}'
+    group: '{{ oracle_install_group }}'
+    mode: 0775
+    recurse: yes
+  become: true
+  tags:
+    - chg_u01_owner_perm
+
+- name: Unpack grid installer files - 19c
+  when: inventory_hostname == ansible_play_hosts_all[0] and ora_version == "19c"
+  ansible.builtin.unarchive:
+    src: "{{ installer_dir }}/{{ installer_archives[0] }}"
+    dest: "{{ grid_home }}/"
+    remote_src: yes
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - unzip_grid_install_file
+
+- name: Delete existing OPatch directory in grid home
+  when: inventory_hostname == ansible_play_hosts_all[0] and ora_version == "19c"
+  ansible.builtin.file:
+    path: "{{ grid_home }}/OPatch"
+    state: absent
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - del_exist_opatch_ghome
+    
+- name: Extract current version of OPatch files - p6880880
+  when: inventory_hostname == ansible_play_hosts_all[0] and ora_version == "19c"
+  ansible.builtin.unarchive:
+    src: "{{ installer_dir }}/{{ installer_archives[5] }}"
+    dest: "{{ grid_home }}/"
+    remote_src: yes
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - unzip_opatch_file_grid
+
+- name: Install cvuqdisk package
+  yum:
+    name: "{{ installer_dir }}/{{ installer_archives[2] }}"
+    state: present 
+    disable_gpg_check: yes
+  become: true
+  tags:
+    - install_cvuqdisk
+
+- name: Unpack grid 19.8 RU patch files 
+  when: inventory_hostname == ansible_play_hosts_all[0] and ora_version == "19c"
+  ansible.builtin.unarchive:
+    src: "{{ installer_dir }}/{{ installer_archives[3] }}"
+    dest: "{{ installer_dir }}/"
+    remote_src: yes
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - unzip_grid_ru_file
+
+- name: Configure the host files with pub addresses
+  lineinfile:
+    path: /etc/hosts
+    regexp: "^{{ item.ip }}"
+    line: "{{ item.ip }}     {{ item.hostname }}.{{ cluster_domain }} {{ item.hostname }}"
+  become: true
+  with_items:
+    - '{{ cluster_pub_ip }}'
+  tags:
+    - config_pub_ip
+
+- name: Configure the host files with priv and vip addresses
+  lineinfile:
+    path: /etc/hosts
+    regexp: "^{{ item.ip }}"
+    line: "{{ item.ip }}     {{ item.hostname }}.{{ cluster_domain }} {{ item.hostname }}"
+  become: true
+  with_items:
+    - '{{ cluster_pri_ip }}'
+    - '{{ cluster_vip_ip }}'
+    - '{{ cluster_scan_ip }}'
+  tags:
+    - config_pri_vip_scan
+
+- name: Generate OpenSSH rsa key pair with default values
+  shell: ssh-keygen -b 2048 -t rsa -f /home/grid/.ssh/id_rsa -q -N ""
+  args:
+    creates: /home/grid/.ssh/id_rsa
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - gen_ssh_key_grid
+
+- name: Fetch all public ssh keys
+  shell: cat ~/.ssh/id_rsa.pub
+  become: true
+  become_user: '{{ grid_user }}'
+  register: grid_ssh_keys
+  tags:
+    - deploy_ssh_key_grid
+
+- name: Check keys
+  debug:
+    msg: "{{ grid_ssh_keys.stdout }}"
+  tags:
+    - deploy_ssh_key_grid
+
+- name: Deploy keys on all servers
+  authorized_key:
+    user: '{{ grid_user }}'
+    key: "{{ hostvars[item]['grid_ssh_keys']['stdout'] }}"
+  become: true
+  with_items:
+    - "{{ ansible_play_hosts_all }}"
+  tags:
+    - deploy_ssh_key_grid
+
+- name: Disable StrictHostKeyChecking
+  template:
+    src: "ssh.config"
+    dest: "/home/grid/.ssh/config"
+    owner: '{{ grid_user }}'
+    group: '{{ oracle_install_group }}'
+    mode: '0644'
+  become: true
+  tags:
+    - disable_StrictHostKeyChecking_grid
+
+- name: Login to remote hosts and local to generate host keys
+  shell: "ssh {{ item }} date"
+  with_items:
+    - "{{ ansible_play_hosts_all }}"
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - gen_host_keys_grid
+
+- name: Generate rsp file for grid install and config
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  template:
+    src: "gridsetup.rsp.{{ ora_version }}"
+    dest: "{{ grid_home }}/gridsetup.rsp"
+    mode: '0600'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - gen_gridsetup_rsp
+
+- name: Generate scp command file to overwrite default scp command
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  template:
+    src: "scp.cmd"
+    dest: "{{ installer_dir }}/scp"
+    mode: '0777'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - gen_scp_command_file
+
+- name: Set ASSUME_DISTID to OL7
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  ansible.builtin.replace:
+    path: "{{ grid_home }}/cv/admin/cvu_config"
+    regexp: '#CV_ASSUME_DISTID=OL7'
+    replace: 'CV_ASSUME_DISTID=OL7'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - set_assume_distid_grid
+
+- name: Set ORACLE_SRVM_REMOTECOPY to /tmp/archive/scp
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  ansible.builtin.replace:
+    path: "{{ grid_home }}/cv/admin/cvu_config"
+    regexp: '#ORACLE_SRVM_REMOTECOPY=/usr/bin/scp'
+    replace: 'ORACLE_SRVM_REMOTECOPY={{ installer_dir }}/scp'
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - set_ORACLE_SRVM_REMOTECOPY_grid
+
+- name: Install grid infrastructure on the cluster
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  command: "{{ grid_home }}/gridSetup.sh -applyRU {{grid_patch}} -applyOneOffs {{grid_patch}}/31281355,{{grid_patch}}/31304218,{{grid_patch}}/31305087,{{grid_patch}}/31335188 -silent -ignorePrereqFailure -responseFile {{ grid_home }}/gridsetup.rsp"
+  become: true
+  become_user: '{{ grid_user }}'
+  ignore_errors: yes
+  tags:
+    - install_grid
+
+- name: Execute Inventory root command on installation node
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  command: "{{ inventory_location }}/orainstRoot.sh"
+  become: true
+  tags:
+    - run_inventory_root.sh.node1
+
+- name: Execute grid home root command on installation node
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  command: "{{ grid_home }}/root.sh"
+  become: true
+  tags:
+    - run_grid_home_root.sh.node1
+
+- name: Execute Inventory root command on other rac nodes
+  when: inventory_hostname != ansible_play_hosts_all[0]
+  command: "{{ inventory_location }}/orainstRoot.sh"
+  become: true
+  tags:
+    - run_inventory_root.sh.other
+
+- name: Execute grid home root command on other rac nodes
+  when: inventory_hostname != ansible_play_hosts_all[0]
+  command: "{{ grid_home }}/root.sh"
+  become: true
+  tags:
+    - run_grid_home_root.sh.other
+
+- name: Configure grid user env - add oracle_home variable
+  lineinfile:
+    dest: "/home/{{ grid_user }}/.bashrc"
+    regexp: '^export ORACLE_HOME={{ grid_home }}'
+    line: "export ORACLE_HOME={{ grid_home }}"
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - config_grid_env
+
+- name: Configure grid user env - add asm_sid variable
+  lineinfile:
+    dest: "/home/{{ grid_user }}/.bashrc"
+    regexp: '^export ORACLE_SID={{ asm_sid }}'
+    line: "export ORACLE_SID={{ asm_sid }}"
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - config_grid_env
+
+- name: Configure grid user env - add grid exe to PATH
+  lineinfile:
+    dest: "/home/{{ grid_user }}/.bashrc"
+    regexp: '^export PATH=$PATH:$ORACLE_HOME/bin'
+    line: "export PATH=$PATH:$ORACLE_HOME/bin"
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - config_grid_env
+
+- name: Creat DATA disk group
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  command: "{{grid_home}}/bin/asmca -silent -createDiskGroup -diskString '/dev/mapper/*' -diskGroupName {{oracle_data}} -disk '/dev/mapper/ora_data*' -redundancy EXTERNAL -sysAsmPassword {{sys_asm_pwd}}"
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - cre_data_dg
+
+- name: Creat REDO disk group
+  when: inventory_hostname == ansible_play_hosts_all[0]
+  command: "{{grid_home}}/bin/asmca -silent -createDiskGroup -diskString '/dev/mapper/*' -diskGroupName {{oracle_reco}} -disk '/dev/mapper/ora_redo*' -redundancy EXTERNAL -sysAsmPassword {{sys_asm_pwd}}"
+  become: true
+  become_user: '{{ grid_user }}'
+  tags:
+    - cre_redo_dg

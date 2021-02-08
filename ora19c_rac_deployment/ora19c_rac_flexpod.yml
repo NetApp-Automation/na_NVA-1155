@@ -1,0 +1,67 @@
+---
+- name: Linux kernel configuration
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: linux_config}
+  tags:
+  - linux_config
+
+- name: Configure storage for Oracle
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: storage_config}
+  tags:
+  - storage_config
+
+- name: Oracle grid infrastructure installation
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: grid_install}
+  tags:
+  - grid_install
+
+- name: Oracle db software installation
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: db_install}
+  tags:
+  - db_install
+
+- name: Create Oracle databases
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: create_database}
+  tags:
+  - create_database
+
+- name: Post installation configuration
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: postinst_config}
+  tags:
+  - postinst_config
+

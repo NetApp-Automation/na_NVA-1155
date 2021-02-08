@@ -1,0 +1,713 @@
+---
+- name: Create a FlexVol for the boot LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    policy: default
+    name: "{{ora_boot_luns[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_boot_luns[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - boot_volumes_create_node1
+
+- name: Create a FlexVol for the boot LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    policy: default
+    name: "{{ora_boot_luns[4].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_boot_luns[4].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - boot_volumes_create_node2
+
+- name: Create the boot LUNs for Oracle servers - node1
+  na_ontap_lun: 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    state: present 
+    vserver: "{{infrastructure_svm}}" 
+    name: "{{ora_boot_luns[0].vol_name}}_{{item}}" 
+    size: "{{ora_boot_luns[0].lun_size}}" 
+    flexvol_name: "{{ora_boot_luns[0].vol_name}}" 
+    ostype: "{{ora_boot_luns[0].type}}" 
+    space_reserve: false
+    https: true 
+    validate_certs: false
+  with_sequence:
+    count="{{ora_boot_luns[0].lun_count}}"
+  tags:
+    - boot_lun_create_node1
+
+- name: Create the boot LUNs for Oracle servers - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    name: "{{ora_boot_luns[4].vol_name}}_{{item}}"
+    size: "{{ora_boot_luns[4].lun_size}}"
+    flexvol_name: "{{ora_boot_luns[4].vol_name}}"
+    ostype: "{{ora_boot_luns[4].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_boot_luns[4].lun_count}}"
+  tags:
+    - boot_lun_create_node2
+
+- name: Map the boot LUNs to corresponding igroups - each boot lun map to a host
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    lun_id: 0
+    https: true
+    validate_certs: false
+  with_together:
+    - "{{initiator_groups}}"
+    - "{{ora_boot_luns}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - boot_lun_map_to_igroup
+
+- name: Create a FlexVol for Oracle binary LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_binary_luns[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_binary_luns[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - binary_volume_create_node1
+
+- name: Create a FlexVol for Oracle binary LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_binary_luns[4].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_binary_luns[4].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - binary_volume_create_node2
+
+- name: Create the Oracle binary LUNs for Oracle servers - node1
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_binary_luns[0].vol_name}}_{{item}}"
+    size: "{{ora_binary_luns[0].lun_size}}"
+    flexvol_name: "{{ora_binary_luns[0].vol_name}}"
+    ostype: "{{ora_binary_luns[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_binary_luns[0].lun_count}}"
+  tags:
+    - binary_lun_create_node1
+
+- name: Create the Oracle binary LUNs for Oracle servers - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_binary_luns[4].vol_name}}_{{item}}"
+    size: "{{ora_binary_luns[4].lun_size}}"
+    flexvol_name: "{{ora_binary_luns[4].vol_name}}"
+    ostype: "{{ora_binary_luns[4].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_binary_luns[4].lun_count}}"
+  tags:
+    - binary_lun_create_node2
+
+- name: Map the Oracle binary LUNs to corresponding igroups - each lun map to a host
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_together:
+    - "{{initiator_groups}}"
+    - "{{ora_binary_luns}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - binary_lun_map_to_igroup
+
+- name: Create a FlexVol for crs LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_crs_luns[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_crs_luns[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - crs_volume_create_node1
+
+- name: Create a FlexVol for crs LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_crs_luns[3].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_crs_luns[3].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - crs_volume_create_node2
+
+- name: Create the crs LUNs for Oracle servers - node1
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_crs_luns[0].vol_name}}_{{item}}"
+    size: "{{ora_crs_luns[0].lun_size}}"
+    flexvol_name: "{{ora_crs_luns[0].vol_name}}"
+    ostype: "{{ora_crs_luns[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_crs_luns[0].lun_count}}"
+  tags:
+    - crs_lun_create_node1
+
+- name: Create the crs LUNs for Oracle servers - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_crs_luns[3].vol_name}}_{{item}}"
+    size: "{{ora_crs_luns[3].lun_size}}"
+    flexvol_name: "{{ora_crs_luns[3].vol_name}}"
+    ostype: "{{ora_crs_luns[3].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_crs_luns[3].lun_count}}"
+  tags:
+    - crs_lun_create_node2
+
+- name: Map the Oracle crs LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_crs_luns}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - crs_lun_map_to_igroup
+
+- name: Create a FlexVol data_01 for data LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_data_luns_01[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_data_luns_01[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - data_01_volume_create
+
+- name: Create data LUNs for Oracle servers in volume data_01 - node1
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_data_luns_01[0].vol_name}}_{{item}}"
+    size: "{{ora_data_luns_01[0].lun_size}}"
+    flexvol_name: "{{ora_data_luns_01[0].vol_name}}"
+    ostype: "{{ora_data_luns_01[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_data_luns_01[0].lun_count}}"
+  tags:
+    - data_01_lun_create
+
+- name: Map the Oracle data_01 LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_data_luns_01}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - data_01_lun_map_to_igroup
+
+- name: Create a FlexVol data_02 for data LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_data_luns_02[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_data_luns_02[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - data_02_volume_create
+
+- name: Create data LUNs for Oracle servers in volume data_02 - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_data_luns_02[0].vol_name}}_{{item}}"
+    size: "{{ora_data_luns_02[0].lun_size}}"
+    flexvol_name: "{{ora_data_luns_02[0].vol_name}}"
+    ostype: "{{ora_data_luns_02[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_data_luns_02[0].lun_count}}"
+  tags:
+    - data_02_lun_create
+
+- name: Map the Oracle data_02 LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_data_luns_02}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - data_02_lun_map_to_igroup
+
+- name: Create a FlexVol data_03 for data LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_data_luns_03[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_data_luns_03[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - data_03_volume_create
+
+- name: Create data LUNs for Oracle servers in volume data_03 - node1
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_data_luns_03[0].vol_name}}_{{item}}"
+    size: "{{ora_data_luns_03[0].lun_size}}"
+    flexvol_name: "{{ora_data_luns_03[0].vol_name}}"
+    ostype: "{{ora_data_luns_03[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_data_luns_03[0].lun_count}}"
+  tags:
+    - data_03_lun_create
+
+- name: Map the Oracle data_03 LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_data_luns_03}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - data_03_lun_map_to_igroup
+
+- name: Create a FlexVol data_04 for data LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_data_luns_04[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_data_luns_04[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - data_04_volume_create
+
+- name: Create data LUNs for Oracle servers in volume data_04 - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_data_luns_04[0].vol_name}}_{{item}}"
+    size: "{{ora_data_luns_04[0].lun_size}}"
+    flexvol_name: "{{ora_data_luns_04[0].vol_name}}"
+    ostype: "{{ora_data_luns_04[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_data_luns_04[0].lun_count}}"
+  tags:
+    - data_04_lun_create
+
+- name: Map the Oracle data_04 LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_data_luns_04}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - data_04_lun_map_to_igroup
+
+- name: Create a FlexVol data_05 for data LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_data_luns_05[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_data_luns_05[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - data_05_volume_create
+
+- name: Create data LUNs for Oracle servers in volume data_05 - node1
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_data_luns_05[0].vol_name}}_{{item}}"
+    size: "{{ora_data_luns_05[0].lun_size}}"
+    flexvol_name: "{{ora_data_luns_05[0].vol_name}}"
+    ostype: "{{ora_data_luns_05[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_data_luns_05[0].lun_count}}"
+  tags:
+    - data_05_lun_create
+
+- name: Map the Oracle data_05 LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_data_luns_05}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - data_05_lun_map_to_igroup
+
+- name: Create a FlexVol data_06 for data LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_data_luns_06[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_data_luns_06[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - data_06_volume_create
+
+- name: Create data LUNs for Oracle servers in volume data_06 - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_data_luns_06[0].vol_name}}_{{item}}"
+    size: "{{ora_data_luns_06[0].lun_size}}"
+    flexvol_name: "{{ora_data_luns_06[0].vol_name}}"
+    ostype: "{{ora_data_luns_06[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_data_luns_06[0].lun_count}}"
+  tags:
+    - data_06_lun_create
+
+- name: Map the Oracle data_06 LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_data_luns_06}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - data_06_lun_map_to_igroup
+
+- name: Create a FlexVol for redo LUNs of Oracle servers - node1
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_redo_luns[0].vol_name}}"
+    aggregate_name: "{{data_aggregates[0].aggr_name}}"
+    size: "{{ora_redo_luns[0].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - redo_volume_create_node1
+
+- name: Create a FlexVol for redo LUNs of Oracle servers - node2
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    policy: default
+    name: "{{ora_redo_luns[4].vol_name}}"
+    aggregate_name: "{{data_aggregates[1].aggr_name}}"
+    size: "{{ora_binary_luns[4].vol_size}}"
+    space_guarantee: none
+    percent_snapshot_space: 0
+    https: true
+    validate_certs: false
+    encrypt: yes
+  tags:
+    - redo_volume_create_node2
+
+- name: Create redo LUNs for Oracle servers - node1
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_redo_luns[0].vol_name}}_{{item}}"
+    size: "{{ora_redo_luns[0].lun_size}}"
+    flexvol_name: "{{ora_redo_luns[0].vol_name}}"
+    ostype: "{{ora_redo_luns[0].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_redo_luns[0].lun_count}}"
+  tags:
+    - redo_lun_create_node1
+
+- name: Create the redo LUNs for Oracle servers - node2
+  na_ontap_lun:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{ora_redo_luns[4].vol_name}}_{{item}}"
+    size: "{{ora_redo_luns[4].lun_size}}"
+    flexvol_name: "{{ora_redo_luns[4].vol_name}}"
+    ostype: "{{ora_redo_luns[4].type}}"
+    space_reserve: false
+    https: true
+    validate_certs: false
+  with_sequence:
+    count="{{ora_redo_luns[4].lun_count}}"
+  tags:
+    - redo_lun_create_node2
+
+- name: Map the Oracle redo LUNs to all cluster nodes igroups
+  na_ontap_lun_map:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    initiator_group_name: "{{item.0.name}}"
+    path: "/vol/{{item.1.vol_name}}/{{item.1.lun_name}}"
+    https: true
+    validate_certs: false
+  with_nested:
+    - "{{initiator_groups}}"
+    - "{{ora_redo_luns}}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - redo_lun_map_to_igroup

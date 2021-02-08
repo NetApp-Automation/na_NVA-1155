@@ -1,0 +1,23 @@
+---
+- name: Linux kernel configuration
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: linux_config}
+  tags:
+  - kernel_config
+
+- name: Configure storage for Oracle
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: storage_config}
+  tags:
+  - storage_config
+

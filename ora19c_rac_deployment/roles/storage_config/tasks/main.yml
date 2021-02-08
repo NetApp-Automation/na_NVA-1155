@@ -1,0 +1,80 @@
+---
+# Each Oracle node has a binary lun assigned to it and it is set at host_vars file of the node.
+# This role configure Oracle binary lun and shared RAC luns for cluster access
+
+- name: Create a new primary partition on binary luns
+  parted:
+    device: '{{ ora_bin }}'
+    number: 1
+    part_type: primary
+    state: present
+    align: optimal
+  become: true
+  tags:
+    - cre_bin_partition 
+
+- name: Format Oracle binary lun with xfs file system
+  filesystem:
+    fstype: xfs
+    dev: "{{ ora_bin }}p1"
+    force: yes
+  become: true
+  tags:
+    - format_ora_bin
+
+- name: Create mount point for Oracle binary directory
+  file:
+    state: directory
+    path: '{{ bin_mount_point }}'
+  become: true
+  tags:
+    - cre_bin_mount_point
+ 
+- name: Mount Oracle binary directory
+  mount:
+    path: '{{ bin_mount_point }}'
+    src: "{{ ora_bin }}p1"
+    fstype: xfs
+    state: mounted
+  become: true
+  tags:
+    - mount_ora_bin
+
+# Switch multipath.conf for RAC setup and SnapCenter, example config files are in templates directory
+# The device alias template file needs modification to environment specific lun ids before execute this task
+- name: Set device alias in multipath config file
+  template:
+    src: "multipath.template"
+    dest: "/etc/multipath.conf"
+    mode: '0644'
+  become: true
+  tags:
+    - set_multipath_conf_file
+
+# Switch udev config file for RAC setup and SnapCenter, example config files are in templates directory
+- name: Create a UDV rules file
+  template:
+    src: "udev.template"
+    dest: "/etc/udev/rules.d/99-oracle-asmdevices.rules"
+    mode: 0644
+  become: true
+  tags:
+    - set_udev_rules
+
+- name: Reload the udev rules
+  shell: "udevadm control --reload-rules"
+  become: true
+  tags:
+    - reload_udev
+
+- name: Trigger the udev rules
+  shell: "udevadm trigger"
+  become: true
+  tags:
+    - trigger_udev
+
+- name: Restart multipathd
+  command: "systemctl restart multipathd"
+  become: true
+  tags:
+    - trigger_udev

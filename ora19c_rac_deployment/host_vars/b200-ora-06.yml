@@ -1,0 +1,14 @@
+# Host networking configuration
+ansible_host: 10.61.180.156
+guest_pub_ip: 10.61.180.156
+guest_vip_ip: 10.61.180.164
+guest_pri_ip: 172.21.101.156
+
+# Binary lun
+ora_bin: /dev/mapper/3600a0980383145374b2451445133576b
+
+# Host DB configuration
+ins_sid: "{{ oracle_sid }}6"
+asm_sid: +ASM6
+
+

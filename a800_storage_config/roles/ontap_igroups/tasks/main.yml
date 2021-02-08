@@ -1,0 +1,36 @@
+---
+- name: Create Oracle hosts FC igroups for infra SVM
+  na_ontap_igroup:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    vserver: "{{infrastructure_svm}}"
+    name: "{{item.name}}"
+    state: present
+    initiator_group_type: fcp
+    os_type: linux
+    initiators: "{{item.initiators}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{initiator_groups}}"
+  tags:
+    - infra_svm_ora_igroups
+
+- name: Create Oracle hosts FC igroups for ora SVM
+  na_ontap_igroup:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    vserver: "{{oracle_svm}}"
+    name: "{{item.name}}"
+    state: present
+    initiator_group_type: fcp
+    os_type: linux
+    initiators: "{{item.initiators}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{initiator_groups}}"
+  tags:
+    - ora_svm_ora_igroups

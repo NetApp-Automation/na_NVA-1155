@@ -1,0 +1,273 @@
+---
+- name: Create the aggr list variable for SVM
+  set_fact:
+    aggr_list: "{{ aggr_list }} + [ '{{item.aggr_name}}']"
+  with_items:
+    - "{{data_aggregates}}"
+  failed_when: item.aggr_name == None or item.aggr_name == ""
+  tags:
+    - ontap_config_svm
+
+- name: See the aggr list
+  debug: var=aggr_list
+  tags:
+    - ontap_config_svm
+
+- name: Create a job schedule for the snapmirror of root volume
+  na_ontap_job_schedule:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    name: "{{item.job_name}}"
+    job_minutes: "{{item.job_minutes}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{job_schedule}}"
+  tags:
+    - ontap_config_job_schedule
+
+- name: Create infrastructure SVM with specified protocols enabled
+  na_ontap_svm:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    name: "{{infrastructure_svm}}"
+    root_volume: "{{infra_root_volume}}"
+    root_volume_aggregate: "{{data_aggregates[0].aggr_name}}"
+    root_volume_security_style: unix
+    allowed_protocols: "{{allowed_protocols}}"
+    aggr_list: "{{aggr_list}}"
+    https: true
+    validate_certs: false
+  failed_when: data_aggregates[0].aggr_name == None or data_aggregates[0].aggr_name == "" or allowed_protocols == None or aggr_list == []
+  tags:
+    - infra_config_svm
+
+- name: Create the load-sharing mirror volume for infra SVM root volume
+  na_ontap_volume: 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    state: present 
+    vserver: "{{infrastructure_svm}}" 
+    name: "{{item.1.mirror_volume}}"  
+    aggregate_name: "{{item.0.aggr_name}}" 
+    size: 1  
+    type: DP 
+    https: true 
+    validate_certs: false
+    encrypt: yes
+  with_together:
+    - "{{data_aggregates}}"
+    - "{{infra_mirror_volumes}}"
+  tags:
+    - infra_cre_mirror_volumes
+
+- name: Create the SnapMirror relationships for mirrored infra SVM root volume
+  na_ontap_snapmirror:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    source_volume: "{{ infra_root_volume }}"
+    destination_volume: "{{ item.mirror_volume }}"
+    source_vserver: "{{ infrastructure_svm }}"
+    destination_vserver: "{{ infrastructure_svm }}"
+    relationship_type: load_sharing
+    schedule: "{{ job_schedule.0.job_name }}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{infra_mirror_volumes}}"
+  tags:
+    - infra_snapmirror_relationship
+
+- name: Initialize the mirroring relationship for mirrored infra SVM root volume
+  na_ontap_snapmirror:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    source_path: "{{ infrastructure_svm }}:{{ infra_root_volume }}"
+    destination_path: "{{ infrastructure_svm }}:{{ item.mirror_volume }}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{infra_mirror_volumes}}"
+  tags:
+    - infra_snapmirror_relationship
+
+- name: Enable the FCP service for infra SVM
+  na_ontap_fcp:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    status: up
+    https: true
+    validate_certs: false
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - infra_enable_fcp_service 
+
+#Set the password for vsadmin first. Account cannot be unlocked without password
+- name: Set password for vsadmin user of infra SVM
+  na_ontap_user:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    applications: http,ontapi,ssh
+    authentication_method: password
+    role_name: vsadmin
+    lock_user: yes
+    name: vsadmin
+    set_password: "{{vsadmin_password}}"
+    https: true
+    validate_certs: false
+  tags:
+    - infra_unlock_svm_vsadmin
+
+- name: Unlock vsadmin user account
+  na_ontap_user:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{infrastructure_svm}}"
+    applications: http,ontapi,ssh
+    authentication_method: password
+    role_name: vsadmin
+    lock_user: no
+    name: vsadmin
+    https: true
+    validate_certs: false
+  tags:
+    - infra_unlock_svm_vsadmin
+
+- name: Create Oracle 19c SVM with specified protocols enabled
+  na_ontap_svm:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    name: "{{oracle_svm}}"
+    root_volume: "{{ora_root_volume}}"
+    root_volume_aggregate: "{{data_aggregates[0].aggr_name}}"
+    root_volume_security_style: unix
+    allowed_protocols: "{{allowed_protocols}}"
+    aggr_list: "{{aggr_list}}"
+    https: true
+    validate_certs: false
+  failed_when: data_aggregates[0].aggr_name == None or data_aggregates[0].aggr_name == "" or allowed_protocols == None or aggr_list == []
+  tags:
+    - ora_config_svm
+
+- name: Create the load-sharing mirror volume for ora SVM root volume
+  na_ontap_volume:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    name: "{{item.1.mirror_volume}}"
+    aggregate_name: "{{item.0.aggr_name}}"
+    size: 1
+    type: DP 
+    https: true
+    validate_certs: false
+    encrypt: yes
+  with_together:
+    - "{{data_aggregates}}"
+    - "{{ora_mirror_volumes}}"
+  tags:
+    - ora_cre_mirror_volumes
+
+- name: Create the SnapMirror relationships for ora SVM root volume
+  na_ontap_snapmirror:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    source_volume: "{{ ora_root_volume }}"
+    destination_volume: "{{ item.mirror_volume }}"
+    source_vserver: "{{ oracle_svm }}"
+    destination_vserver: "{{ oracle_svm }}"
+    relationship_type: load_sharing
+    schedule: "{{ job_schedule.0.job_name }}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ora_mirror_volumes}}"
+  tags:
+    - ora_snapmirror_relationship
+
+- name: Initialize the mirroring relationship for ora SVM root volume
+  na_ontap_snapmirror:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    source_path: "{{ oracle_svm }}:{{ ora_root_volume }}"
+    destination_path: "{{ oracle_svm }}:{{ item.mirror_volume }}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ora_mirror_volumes}}"
+  tags:
+    - ora_snapmirror_relationship
+
+- name: Enable the FCP service for ora SVM
+  na_ontap_fcp:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    status: up
+    https: true
+    validate_certs: false
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - ora_enable_fcp_service
+
+#Set the password for vsadmin first. Account cannot be unlocked without password
+- name: Set password for vsadmin user of ora SVM
+  na_ontap_user:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    applications: http,ontapi,ssh
+    authentication_method: password
+    role_name: vsadmin
+    lock_user: yes
+    name: vsadmin
+    set_password: "{{vsadmin_password}}"
+    https: true
+    validate_certs: false
+  tags:
+    - ora_unlock_svm_vsadmin
+
+- name: Unlock vsadmin user of ora SVM
+  na_ontap_user:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    vserver: "{{oracle_svm}}"
+    applications: http,ontapi,ssh
+    authentication_method: password
+    role_name: vsadmin
+    lock_user: no
+    name: vsadmin
+    https: true
+    validate_certs: false
+  tags:
+    - ora_unlock_svm_vsadmin

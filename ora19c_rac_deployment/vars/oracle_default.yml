@@ -1,0 +1,127 @@
+######################################
+### Linux default config variables ###
+######################################
+
+# Set OS option: Linux [ OL - Oracle Linux | RHEL - RedHat | SLES - SUSE ]
+os: OL
+
+# Set DB version specific OL rpm
+preinstall_rpm: oracle-database-preinstall-19c
+
+# Set NetApp host utility to install
+netapp_utl: 
+  - libhbaapi-2.2.9-13.el8.x86_64.rpm
+  - libhbalinux-1.0.17-7.el8.x86_64.rpm
+  - netapp_linux_unified_host_utilities-7-1.x86_64.rpm
+
+# Oracle storage based on ASM storage type
+bin_mount_point: /u01
+oracle_base: /u01/app/oracle
+grid_base: /u01/app/grid
+
+oracle_user: oracle
+oracle_install_group: oinstall
+grid_user: grid
+grid_user_id: 54331
+grid_groups:
+  - {name: asmdba, id: 54327}
+  - {name: asmoper, id: 54328}
+  - {name: asmadmin, id: 54329}
+  - {name: dba, id: 54322}
+  - {name: racdba, id: 54330}
+
+java_version: java-1.8.0-openjdk.x86_64
+
+############################################################
+### Grid default installation and configuraton variables ###
+############################################################
+
+grid_home: "/u01/app/{{ ora_version_num }}/grid"
+grid_install_option: CRS_CONFIG
+osasm_group: asmadmin
+asmdba_group: asmdba
+asmoper_group: asmoper
+scan_type: LOCAL_SCAN
+cluster_type: STANDALONE
+asm_type: ASM
+ocr_dg: VOTE
+ocr_dg_redundancy: NORMAL 
+ocr_failgroups: OCR_ONTAP1,OCR_ONTAP2,OCR_ONTAP12
+disks_failgroups: /dev/mapper/ora_crs_01_1,OCR_ONTAP1,/dev/mapper/ora_crs_01_2,OCR_ONTAP1,/dev/mapper/ora_crs_01_3,OCR_ONTAP12,/dev/mapper/ora_crs_02_1,OCR_ONTAP2,/dev/mapper/ora_crs_02_2,OCR_ONTAP2,/dev/mapper/ora_crs_02_3,OCR_ONTAP12
+ocr_asm_disks: 
+quorum_failgroups: OCR_ONTAP1,OCR_ONTAP2
+disk_discovery_string: /dev/mapper/ora*
+
+sys_asm_pwd: '{{ initial_pwd_all }}'
+asm_snmp_pwd: '{{ initial_pwd_all }}'
+
+
+##########################################################
+### DB default installation and configuraton variables ###
+##########################################################
+
+# Set Oracle version
+ora_version: 19c
+# Set Oracle version number for Oracle home directory
+ora_version_num: 19800
+
+# Installation folder
+installation_folder: '{{ oracle_home }}'
+installer_dir: /tmp/archive
+grid_patch: /tmp/archive/31305339
+db_patch: /tmp/archive/31281355
+installer_archives:
+  - "LINUX.X64_193000_grid_home.zip"
+  - "LINUX.X64_193000_db_home.zip"
+  - "cvuqdisk-1.0.10-1.rpm"
+  - "p31305339_190000_Linux-x86-64.zip"
+  - "p31281355_190000_Linux-x86-64.zip"
+  - "p6880880_190000_Linux-x86-64.zip"
+
+install_option: INSTALL_DB_SWONLY
+inventory_group: '{{ oracle_install_group }}'
+inventory_location: /u01/app/oraInventory
+oracle_home: '{{ oracle_base }}/product/{{ ora_version_num }}/{{ oracle_sid }}'
+db_software_edition: EE
+osdba_group: dba
+osoper_group: oper
+osbackupdba_group: oper
+osdgdba_group: dba
+oskmdba_group: dba
+osracdba_group: dba
+
+# RAC specific
+# ADMIN_MANAGED, POLICY_MANAGED, default is ADMIN_MANAGED
+rac_config_type: ADMIN_MANAGED
+isracone:
+racone_servicename:
+server_pool_name:
+server_pool_cardinality:
+
+# DB options
+# Number of instance: [ SI - single instance | RAC - multiple instance ]
+db_instance: RAC
+db_type: MULTIPURPOSE
+db_template: General_Purpose.dbc
+storage_type: ASM
+oracle_data: DATA
+oracle_reco: RECO
+
+sys_pwd: '{{ initial_pwd_all }}'
+system_pwd: '{{ initial_pwd_all }}'
+pdbadmin_pwd: '{{ initial_pwd_all }}'
+dbsnmp_pwd: '{{ initial_pwd_all }}'
+
+global_dbname: '{{ oracle_sid }}.{{ cluster_domain }}'
+container_db: true
+pdb_local_undo: true
+character_set: AL32UTF8
+nl_character_set: AL16UTF16
+auto_mem_mgmt: false
+example_schema: false
+db_mgmt_option: DEFAULT
+data_location: '{{ oracle_data }}'
+recovery_location: '{{ oracle_reco }}'
+dbca_rsp: 'dbca.rsp.{{ ora_version }}'
+netca_rsp: 'netca.rsp.{{ ora_version }}'
+node_list: '{{ cluster_nodes }}'

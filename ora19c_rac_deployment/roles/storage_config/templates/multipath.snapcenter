@@ -1,0 +1,9 @@
+defaults {
+        find_multipaths yes
+        user_friendly_names no
+}
+
+
+blacklist {
+}
+

@@ -1,0 +1,62 @@
+---
+- name: primary setup for ontap cluster 
+  hosts: ontap 
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+  roles:
+  - { role: primary_setup}
+  tags:
+  - ontap_primary_setup
+
+- name: Configure svms for Oracle
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+  roles:
+  - { role: ontap_svms}
+  tags:
+  - ontap_svms
+
+- name: Configure svms lifs
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+  roles:
+  - { role: ontap_lifs}
+  tags:
+  - ontap_lifs
+
+- name: Configure igroups
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+    - vars/ontap_lun_layout.yml
+  roles:
+  - { role: ontap_igroups}
+  tags:
+  - ontap_igroups
+
+- name: Configure luns for Oracle databases
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+    - vars/ontap_lun_layout.yml
+  roles:
+  - { role: ontap_luns}
+  tags:
+  - ontap_luns

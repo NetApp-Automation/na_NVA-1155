@@ -1,0 +1,11 @@
+- name: Oracle software only installation
+  hosts: oracle
+  gather_facts: false
+  vars_files:
+    - vars/oracle_main.yml
+    - vars/oracle_default.yml
+  roles:
+  - { role: db_install}
+  tags:
+  - db_install
+

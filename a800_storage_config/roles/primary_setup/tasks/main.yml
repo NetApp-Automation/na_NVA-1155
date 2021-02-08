@@ -1,0 +1,249 @@
+---
+- name: Ensure auto-revert parameter is set for the cluster management interface
+  na_ontap_interface: 
+    vserver: "{{cluster_name}}" 
+    is_auto_revert: "{{cluster_mgmt_auto_revert}}" 
+    interface_name: "{{cluster_mgmt_interface}}" 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false
+  tags:
+    - ontap_config_cluster_mgmt
+ 
+- name: Set up the service processor network interface
+  na_ontap_service_processor_network:  
+    state: present 
+    ip_address: "{{item.ip}}" 
+    netmask: "{{item.mask}}" 
+    gateway_ip_address: "{{item.gateway}}" 
+    node: "{{item.node}}" 
+    is_enabled: true 
+    address_type: ipv4
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  with_items:
+    - "{{ sp }}"
+  tags:
+    - ontap_config_sp_interface
+
+#Create data aggregates if it is not configured during cluster configuration
+- name: Create the data aggregates 
+  na_ontap_aggregate:  
+    state: present 
+    name: "{{item.0.aggr_name}}" 
+    disk_count: "{{item.0.diskcount}}" 
+    nodes: "{{item.1}}"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false  
+  with_together: 
+    - "{{data_aggregates}}"
+    - "{{nodes}}"
+  tags:
+    - ontap_create_data_aggr
+
+- name: Ensure cluster HA status
+  na_ontap_cluster_ha: 
+    state: present 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  tags:
+    - ontap_check_cluster_ha
+
+- name: Enable CDP on the Storage Controller Nodes
+  na_ontap_command: 
+    command: "['node', 'run', '-node', '{{item}}', 'options', 'cdpd.enable', 'on']"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  with_items:
+    - "{{nodes}}"
+  tags:
+    - ontap_enable_cdp
+
+- name: Enable LLDP on the Storage Controller Nodes
+  na_ontap_command: 
+    command: "['node', 'run', '-node', '{{item}}', 'options', 'lldp.enable', 'on']"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  with_items:
+    - "{{nodes}}"
+  tags:
+    - ontap_enable_lldp
+
+- name: Configure DNS server
+  na_ontap_dns: 
+    state: present 
+    vserver: "{{cluster_name}}" 
+    nameservers: "{{dns_server}}" 
+    domains: "{{dns_domain}}" 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  tags:
+    - ontap_config_dns
+
+- name: Configure NTP server
+  na_ontap_ntp: 
+    state: present 
+    server_name: "{{item}}" 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  with_items:
+    - "{{ntp_server}}"
+  tags:
+    - ontap_config_ntp
+
+- name: Enable Takeover for Storage Failover
+  na_ontap_command: 
+    command: "['storage', 'failover', 'modify', '-node', '{{item}}', '-enabled', 'true']"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  with_items:
+    - "{{nodes}}"
+  tags:
+    - ontap_validate_storage_failover_state
+
+- name: Set Cluster's Timezone
+  na_ontap_command: 
+    command: "['cluster', 'date', 'modify', '-timezone', '{{timezone}}']"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false 
+  tags:
+    - ontap_set_timezone
+
+- name: Enable Hardware assist failover
+  na_ontap_command: 
+    command: "['storage', 'failover', 'modify', '-node', '{{nodes[0]}}', '-hwassist', 'true', '-hwassist-partner-ip', '{{nodes_ip[1]}}']"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false
+  tags:
+    - ontap_enable_hwassist_a
+
+- name: Enable Hardware assist failover
+  na_ontap_command: 
+    command: "['storage', 'failover', 'modify', '-node', '{{nodes[1]}}', '-hwassist', 'true', '-hwassist-partner-ip', '{{nodes_ip[0]}}']"
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false
+  tags:
+    - ontap_enable_hwassist_b
+
+# Bring down FCP ports to set manual speed
+- name: FCP Adapter Settings Node A - admin down
+  na_ontap_command:
+    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[0] }}', '-adapter', '{{ item }}', '-status-admin', 'down']"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ node_fcp_ports }}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - ontap_fc_adapters
+
+- name: FCP Adapter Settings Node B - admin down
+  na_ontap_command:
+    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[1] }}', '-adapter', '{{ item }}', '-status-admin', 'down']"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ node_fcp_ports }}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - ontap_fc_adapters
+
+- name: FCP Adapter Settings Part II Node A - set speed 
+  na_ontap_command:
+    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[0] }}', '-adapter', '{{ item }}', '-speed', '{{ fcp_port_speed }}', '-status-admin', 'up']"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ node_fcp_ports }}"  
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - ontap_fc_adapters
+
+- name: FCP Adapter Settings Part II Node B - set speed
+  na_ontap_command:
+    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[1] }}', '-adapter', '{{ item }}', '-speed', '{{ fcp_port_speed }}', '-status-admin', 'up']"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  with_items:
+    - "{{ node_fcp_ports }}"
+  when: "('fcp' in allowed_protocols)"
+  tags:
+    - ontap_fc_adapters
+
+- name: Configure autosupport
+  na_ontap_autosupport: 
+    mail_hosts: "{{autosupport_vars.mail_hosts}}" 
+    node_name: "{{item}}" 
+    noteto: "{{autosupport_vars.noteto}}" 
+    transport: https 
+    post_url: "{{autosupport_vars.post_url | default(omit)}}" 
+    support: yes 
+    state: present 
+    hostname: "{{inventory_hostname}}" 
+    username: "{{username}}" 
+    password: "{{password}}" 
+    https: true 
+    validate_certs: false
+  with_items:
+    - "{{nodes}}"
+  tags:
+    - ontap_config_autosupport
+
+- name: Add ONTAP licenses 
+  na_ontap_license:
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    state: present
+    https: true
+    validate_certs: false
+    license_codes: "{{ ontap_license }}"
+  tags:
+    - ontap_license
