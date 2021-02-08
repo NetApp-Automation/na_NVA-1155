@@ -2,11 +2,11 @@
 
 Ansible is a declarative, state-based, idempotent configuration management platform. It uses simple to read/write YAML files to describe the configuration.  This repository contains Ansible roles and playbooks for an end-to-end storage deployment on A800 HA controller pair for Oracle 19c RAC database deployment as per NVA-1155 deployment guide. This is offered as an optional automated solution deployment to complement manual deployment process as outlined in the deployment guide. The A800 storage deployment automation is roles based and is built with folowing roles:
 	
-	primary_setup
-	ontap_svms
-	ontap_lifs
-	ontap_igroups
-	ontap_luns
+	primary_setup - General configuration of A800 controller pair
+	ontap_svms - Create SVMs for infrastructure and Oracle 
+	ontap_lifs - Create lifs for storage access
+	ontap_igroups - Create igroup for each RAC node
+	ontap_luns - Create Oracle luns based on predefined Oracle storage layout 
 
 These roles are developed as per the best practices prescribed in NetApp Validated Architectures NVA-1155. It is built with avaiable Ansible modules at time for implementing storage deployment functions included in these roles for OracleRAC database deployment on FlexPod. 
 
@@ -14,11 +14,11 @@ These roles are developed as per the best practices prescribed in NetApp Validat
 
 As the automation solution is specifically build for NVA-1155. The current roles and playbooks support following components and configurations:
 
-        Operating System: Oracle Linux
-        Storage System: ONTAP
+        Operating System: Oracle Linux 8.2 RHCK 4.18.0-193.el8.x86_64
+        Storage System: ONTAP 9.7
         Storage Protocol: FC
-        Oracle Version: 19C
-        Oracle Storage Type: XFS, ASM
+        Oracle Version: 19c grid with 19.8 patch, 19c Oracle database EE with 19.8 patch
+        Oracle Storage Type: XFS for Oracle binary lun, ASM for shared DATA, REDO and CRS
         Oracle Instance Type: Oracle RAC
 
 ### Prerequisite
@@ -29,8 +29,7 @@ It is assumed that pre-setup activity has been completed on A800 HA controller p
 
 These deployment instructions will enable you to create VM from a template as an Ansible controller and download the specific solution playbook and run the Ansible roles to deploy storage configuration on A800 controller for Oracle 19c RAC database deployment that fits your specific envrironment using few parameter files.
 
-This solution specific NetApp Ansible roles are located at [https://bitbucket.ngage.netapp.com/scm/ciac-bb/ansible-toolkit.git](https://bitbucket.ngage.netapp.com/scm/ciac-bb/ansible-toolkit.git) repository. So we will refer it as 
-"NetApp Solution Repo" in this documentation.
+This solution specific NetApp Ansible roles are located at [https://bitbucket.ngage.netapp.com/projects/NS-BB/repos/na_nva-1155.git](https://bitbucket.ngage.netapp.com/projects/NS-BB/repos/na_nva-1155.git) repository. So we will refer it as "NetApp Solution Repo" in this documentation.
 
 First you need to start with a VM template to build Ansible control VM. Then get Ansible roles and playbook to configure your A800 storage system. 
 
@@ -71,7 +70,7 @@ Navigate to the NetApp Solution Automation repo:
  * or Run git clone
 
   ```
-       git clone -b oracle_deployoment https://bitbucket.ngage.netapp.com/projects/CIAC-BB/repos/ansible-toolkit.git
+       git clone https://bitbucket.ngage.netapp.com/projects/NS-BB/repos/na_nva-1155.git
 
   ```
  
@@ -89,11 +88,13 @@ The ontap_main.yml parameter file is populated with values from solution develop
 ###  Setting up host inventory file
 This is the cluster host name or IP address for your ONTAP A800 cluster
 e.g.
-[ontap]
-10.61.185.161
+  ```
+  [ontap]
+  10.61.184.192
 
+  ```
 ### Executing the playbook
-For FlexPod deployment, there is a a800_flexpod_9.7.yml file that is the playbook at the top level that calls the required roles for A800 deployment. Once you are done revising with all three parameter files, use following command to kick off the playbook. Playbook is executed under a user id admin at Ansible control VM.
+For FlexPod deployment, we have created an playbook a800_flexpod_9.7.yml file at the top level that calls all required roles for A800 deployment. Once you are done revising with all three parameter files, use following command to kick off the playbook. Playbook is executed under a user id admin at Ansible control VM. You could also create your own playbook to call individual roles if so desired.
 
   ```
    ansible-playbook -i hosts a800_flexpod_9.7.yml 
@@ -114,6 +115,7 @@ Execution with -t option only execute a particular role or tasks as identified b
  
 ### License
 
-TBD
+Read LICENSE.TXT
 
 ### Additional information
+
