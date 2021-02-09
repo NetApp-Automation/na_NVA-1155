@@ -77,6 +77,16 @@ Navigate to the NetApp Solution Automation repo:
 
   ```
  
+###  Download Oracle installation files 
+The automation expect that following installation files are avaiable at /home/admin/Downloads directory. At the run time, these files will be copied to target RAC node for installation. These files are ready available from Oracle support site. 
+
+ * LINUX.X64_193000_grid_home.zip
+ * LINUX.X64_193000_db_home.zip
+ * cvuqdisk-1.0.10-1.rpm
+ * p31305339_190000_Linux-x86-64.zip
+ * p31281355_190000_Linux-x86-64.zip
+ * p6880880_190000_Linux-x86-64.zip
+ 
 ###  Setting up parameter files 
 There are several parameter files that are driving Oracle 19c RAC deployment in vars, and host_var folders under ora19c_rac_deployment root directory as listed below:
 
