@@ -1,0 +1,23 @@
+- name: Configure svms for Oracle
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+  roles:
+  - { role: ontap_svms}
+  tags:
+  - ontap_svms
+
+- name: Configure svms lifs
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+  roles:
+  - { role: ontap_lifs}
+  tags:
+  - ontap_lifs

@@ -1,0 +1,13 @@
+---
+- name: primary setup for ontap cluster
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+  roles:
+  - { role: primary_setup}
+  tags:
+  - ontap_primary_setup
+

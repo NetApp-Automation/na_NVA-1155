@@ -1,0 +1,25 @@
+- name: Configure igroups
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+    - vars/ontap_lun_layout.yml
+  roles:
+  - { role: ontap_igroups}
+  tags:
+  - ontap_igroups
+
+- name: Configure luns for Oracle databases
+  hosts: ontap
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars/ontap_main.yml
+    - vars/ontap_default.yml
+    - vars/ontap_lun_layout.yml
+  roles:
+  - { role: ontap_luns}
+  tags:
+  - ontap_luns
