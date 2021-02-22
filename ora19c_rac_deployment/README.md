@@ -163,6 +163,8 @@ or
 
 Execution with -t xxx option following the main yml file above only execute a particular role or tasks as identified by the tag id. To create additional CDB and PDBs within the RAC cluster. Change oracle_sid variable and EMEXPRESS port and run ora19c_create_db.yml again.
 
+Note: A full installation run will build Oracle 19c grid infrastructure and install a CDB instance that hosts three pluggable databases (PDBs). To create addtional CDB instance and PDBs for the instance within the same cluster, execute db_install and create_database roles again with different SID and EM express port number in oracle_main.yml file. The additional DB installation will create seperate ORACLE_HOME for each instance identified by SID.
+
 ### Authors
 
  * Allen Cao (allen.cao@netapp.com)
