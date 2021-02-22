@@ -2,6 +2,12 @@
 # Each Oracle node has a binary lun assigned to it and it is set at host_vars file of the node.
 # This role configure Oracle binary lun and shared RAC luns for cluster access
 
+- name: Import luns by scan SCSI channels
+  shell: rescan-scsi-bus.sh
+  become: true
+  tags:
+    - scan_scsi_bus
+
 - name: Create a new primary partition on binary luns
   parted:
     device: '{{ ora_bin }}'

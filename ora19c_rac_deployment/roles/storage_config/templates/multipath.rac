@@ -9,251 +9,251 @@ blacklist {
 
 multipaths {
         multipath {
-                wwid            3600a0980383145374b2451445133572f
+                wwid            3600a098038314537352451443842616c
                 alias           ora_crs_01_1
         }
         multipath {
-                wwid            3600a0980383145374b24514451335761
+                wwid            3600a098038314537352451443842616d
                 alias           ora_crs_01_2
         }
         multipath {
-                wwid            3600a098038314537352451443842616b
+                wwid            3600a098038314537352451443842616e
                 alias           ora_crs_01_3
         }
         multipath {
-                wwid            3600a0980383145374b24514451335763
+                wwid            3600a0980383145374b2451445133736d
                 alias           ora_crs_02_1
         }
         multipath {
-                wwid            3600a0980383145374b24514451335762
+                wwid            3600a0980383145374b2451445133736e
                 alias           ora_crs_02_2
         }
         multipath {
-                wwid            3600a0980383145374b2451445133736c
+                wwid            3600a0980383145374b2451445133736f
                 alias           ora_crs_02_3
         }
         multipath {
-                wwid            3600a0980383145373524514438424557
+                wwid            3600a098038314537352451443842616f
                 alias           ora_data_01_1
         }
         multipath {
-                wwid            3600a0980383145373524514438424556
+                wwid            3600a0980383145373524514438426170
                 alias           ora_data_01_2
         }
         multipath {
-                wwid            3600a0980383145373524514438424555
+                wwid            3600a0980383145373524514438426171
                 alias           ora_data_01_3
         }
         multipath {
-                wwid            3600a0980383145373524514438424558
+                wwid            3600a0980383145373524514438426172
                 alias           ora_data_01_4
         }
         multipath {
-                wwid            3600a0980383145374b2451445133574d
+                wwid            3600a0980383145373524514438426173
+                alias           ora_data_01_5
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426174
+                alias           ora_data_01_6
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426175
+                alias           ora_data_01_7
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426176
+                alias           ora_data_01_8
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337370
                 alias           ora_data_02_1
         }
         multipath {
-                wwid            3600a0980383145374b2451445133574e
+                wwid            3600a0980383145374b24514451337371
                 alias           ora_data_02_2
         }
         multipath {
-                wwid            3600a0980383145374b2451445133574c
+                wwid            3600a0980383145374b24514451337372
                 alias           ora_data_02_3
         }
         multipath {
-                wwid            3600a0980383145374b2451445133574b
+                wwid            3600a0980383145374b24514451337373
                 alias           ora_data_02_4
         }
         multipath {
-                wwid            3600a0980383145374b24514451335750
+                wwid            3600a0980383145374b24514451337374
+                alias           ora_data_02_5
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337375
+                alias           ora_data_02_6
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337376
+                alias           ora_data_02_7
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337377
+                alias           ora_data_02_8
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426177
                 alias           ora_data_03_1
         }
         multipath {
-                wwid            3600a0980383145374b24514451335751
+                wwid            3600a0980383145373524514438426178
                 alias           ora_data_03_2
         }
         multipath {
-                wwid            3600a0980383145374b24514451335752
+                wwid            3600a0980383145373524514438426179
                 alias           ora_data_03_3
         }
         multipath {
-                wwid            3600a0980383145374b2451445133574f
+                wwid            3600a098038314537352451443842617a
                 alias           ora_data_03_4
         }
         multipath {
-                wwid            3600a0980383145373524514438424561
+                wwid            3600a0980383145373524514438426230
+                alias           ora_data_03_5
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426231
+                alias           ora_data_03_6
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426232
+                alias           ora_data_03_7
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426233
+                alias           ora_data_03_8
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337378
                 alias           ora_data_04_1
         }
         multipath {
-                wwid            3600a098038314537352451443842452f
+                wwid            3600a0980383145374b24514451337379
                 alias           ora_data_04_2
         }
         multipath {
-                wwid            3600a098038314537352451443842455a
+                wwid            3600a0980383145374b2451445133737a
                 alias           ora_data_04_3
         }
         multipath {
-                wwid            3600a0980383145373524514438424559
+                wwid            3600a0980383145374b24514451337430
                 alias           ora_data_04_4
         }
         multipath {
-                wwid            3600a0980383145373524514438424564
+                wwid            3600a0980383145374b24514451337431
+                alias           ora_data_04_5
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337432
+                alias           ora_data_04_6
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337433
+                alias           ora_data_04_7
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337434
+                alias           ora_data_04_8
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426234
                 alias           ora_data_05_1
         }
         multipath {
-                wwid            3600a0980383145373524514438424562
+                wwid            3600a0980383145373524514438426235
                 alias           ora_data_05_2
         }
         multipath {
-                wwid            3600a0980383145373524514438424565
+                wwid            3600a0980383145373524514438426236
                 alias           ora_data_05_3
         }
         multipath {
-                wwid            3600a0980383145373524514438424563
+                wwid            3600a0980383145373524514438426237
                 alias           ora_data_05_4
         }
         multipath {
-                wwid            3600a0980383145373524514438424566
+                wwid            3600a0980383145373524514438426238
+                alias           ora_data_05_5
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426239
+                alias           ora_data_05_6
+        }
+        multipath {
+                wwid            3600a098038314537352451443842622d
+                alias           ora_data_05_7
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426241
+                alias           ora_data_05_8
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337435
                 alias           ora_data_06_1
         }
         multipath {
-                wwid            3600a0980383145373524514438424567
+                wwid            3600a0980383145374b24514451337436
                 alias           ora_data_06_2
         }
         multipath {
-                wwid            3600a0980383145373524514438424568
+                wwid            3600a0980383145374b24514451337437
                 alias           ora_data_06_3
         }
         multipath {
-                wwid            3600a0980383145373524514438424569
+                wwid            3600a0980383145374b24514451337438
                 alias           ora_data_06_4
         }
         multipath {
-                wwid            3600a098038314537352451443842456b
-                alias           ora_data_07_1
+                wwid            3600a0980383145374b24514451337439
+                alias           ora_data_06_5
         }
         multipath {
-                wwid            3600a098038314537352451443842456c
-                alias           ora_data_07_2
+                wwid            3600a0980383145374b2451445133742d
+                alias           ora_data_06_6
         }
         multipath {
-                wwid            3600a098038314537352451443842456d
-                alias           ora_data_07_3
+                wwid            3600a0980383145374b24514451337441
+                alias           ora_data_06_7
         }
         multipath {
-                wwid            3600a098038314537352451443842456a
-                alias           ora_data_07_4
+                wwid            3600a0980383145374b24514451337442
+                alias           ora_data_06_8
         }
         multipath {
-                wwid            3600a0980383145373524514438424570
-                alias           ora_data_08_1
-        }
-        multipath {
-                wwid            3600a098038314537352451443842456f
-                alias           ora_data_08_2
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424571
-                alias           ora_data_08_3
-        }
-        multipath {
-                wwid            3600a098038314537352451443842456e
-                alias           ora_data_08_4
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424572
-                alias           ora_data_09_1
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424573
-                alias           ora_data_09_2
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424575
-                alias           ora_data_09_3
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424574
-                alias           ora_data_09_4
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335777
-                alias           ora_data_10_1
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335775
-                alias           ora_data_10_2
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335778
-                alias           ora_data_10_3
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335776
-                alias           ora_data_10_4
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424576
-                alias           ora_data_11_1
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424577
-                alias           ora_data_11_2
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424579
-                alias           ora_data_11_3
-        }
-        multipath {
-                wwid            3600a0980383145373524514438424578
-                alias           ora_data_11_4
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335779
-                alias           ora_data_12_1
-        }
-        multipath {
-                wwid            3600a0980383145374b2451445133577a
-                alias           ora_data_12_2
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335831
-                alias           ora_data_12_3
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335830
-                alias           ora_data_12_4
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335753
+                wwid            3600a0980383145374b24514451337442
                 alias           ora_redo_01_1
         }
         multipath {
-                wwid            3600a0980383145374b24514451335754
+                wwid            3600a0980383145373524514438426243
                 alias           ora_redo_01_2
         }
         multipath {
-                wwid            3600a0980383145374b24514451335755
+                wwid            3600a0980383145373524514438426244
+                alias           ora_redo_01_3
+        }
+        multipath {
+                wwid            3600a0980383145373524514438426245
+                alias           ora_redo_01_4
+        }
+        multipath {
+                wwid            3600a0980383145374b24514451337443
                 alias           ora_redo_02_1
         }
         multipath {
-                wwid            3600a0980383145374b24514451335756
+                wwid            3600a0980383145374b24514451337444
                 alias           ora_redo_02_2
         }
         multipath {
-                wwid            3600a0980383145374b24514451335757
-                alias           ora_redo_03_1
+                wwid            3600a0980383145374b24514451337445
+                alias           ora_redo_02_3
         }
         multipath {
-                wwid            3600a0980383145374b24514451335758
-                alias           ora_redo_03_2
-        }
-        multipath {
-                wwid            3600a0980383145374b24514451335759
-                alias           ora_redo_04_1
-        }
-        multipath {
-                wwid            3600a0980383145374b2451445133575a
-                alias           ora_redo_04_2
+                wwid            3600a0980383145374b24514451337446
+                alias           ora_redo_02_4
         }
 }
