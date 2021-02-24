@@ -32,22 +32,22 @@
     - ontap_config_sp_interface
 
 #Create data aggregates if it is not configured during cluster configuration
-- name: Create the data aggregates 
-  na_ontap_aggregate:  
-    state: present 
-    name: "{{item.0.aggr_name}}" 
-    disk_count: "{{item.0.diskcount}}" 
-    nodes: "{{item.1}}"
-    hostname: "{{inventory_hostname}}" 
-    username: "{{username}}" 
-    password: "{{password}}" 
-    https: true 
-    validate_certs: false  
-  with_together: 
-    - "{{data_aggregates}}"
-    - "{{nodes}}"
-  tags:
-    - ontap_create_data_aggr
+#- name: Create the data aggregates 
+#  na_ontap_aggregate:  
+#    state: present 
+#    name: "{{item.0.aggr_name}}" 
+#    disk_count: "{{item.0.diskcount}}" 
+#    nodes: "{{item.1}}"
+#    hostname: "{{inventory_hostname}}" 
+#    username: "{{username}}" 
+#    password: "{{password}}" 
+#    https: true 
+#    validate_certs: false  
+#  with_together: 
+#    - "{{data_aggregates}}"
+#    - "{{nodes}}"
+#  tags:
+#    - ontap_create_data_aggr
 
 - name: Ensure cluster HA status
   na_ontap_cluster_ha: 
@@ -114,6 +114,17 @@
   tags:
     - ontap_config_ntp
 
+- name: Set Cluster's Timezone
+  na_ontap_command:
+    command: "['cluster', 'date', 'modify', '-timezone', '{{timezone}}']"
+    hostname: "{{inventory_hostname}}"
+    username: "{{username}}"
+    password: "{{password}}"
+    https: true
+    validate_certs: false
+  tags:
+    - ontap_set_timezone
+
 - name: Enable Takeover for Storage Failover
   na_ontap_command: 
     command: "['storage', 'failover', 'modify', '-node', '{{item}}', '-enabled', 'true']"
@@ -127,20 +138,9 @@
   tags:
     - ontap_validate_storage_failover_state
 
-- name: Set Cluster's Timezone
+- name: Enable Hardware assist failover - Node A
   na_ontap_command: 
-    command: "['cluster', 'date', 'modify', '-timezone', '{{timezone}}']"
-    hostname: "{{inventory_hostname}}" 
-    username: "{{username}}" 
-    password: "{{password}}" 
-    https: true 
-    validate_certs: false 
-  tags:
-    - ontap_set_timezone
-
-- name: Enable Hardware assist failover
-  na_ontap_command: 
-    command: "['storage', 'failover', 'modify', '-node', '{{nodes[0]}}', '-hwassist', 'true', '-hwassist-partner-ip', '{{nodes_ip[1]}}']"
+    command: "['storage', 'failover', 'modify', '-node', '{{nodes[0]}}', '-hwassist', 'true']"
     hostname: "{{inventory_hostname}}" 
     username: "{{username}}" 
     password: "{{password}}" 
@@ -149,9 +149,9 @@
   tags:
     - ontap_enable_hwassist_a
 
-- name: Enable Hardware assist failover
+- name: Enable Hardware assist failover - Node B
   na_ontap_command: 
-    command: "['storage', 'failover', 'modify', '-node', '{{nodes[1]}}', '-hwassist', 'true', '-hwassist-partner-ip', '{{nodes_ip[0]}}']"
+    command: "['storage', 'failover', 'modify', '-node', '{{nodes[1]}}', '-hwassist', 'true']"
     hostname: "{{inventory_hostname}}" 
     username: "{{username}}" 
     password: "{{password}}" 
@@ -175,9 +175,9 @@
   tags:
     - ontap_fc_adapters
 
-- name: FCP Adapter Settings Node B - admin down
+- name: FCP Adapter Settings Part II Node A - set speed
   na_ontap_command:
-    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[1] }}', '-adapter', '{{ item }}', '-status-admin', 'down']"
+    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[0] }}', '-adapter', '{{ item }}', '-speed', '{{ fcp_port_speed }}', '-status-admin', 'up']"
     hostname: "{{inventory_hostname}}"
     username: "{{username}}"
     password: "{{password}}"
@@ -189,16 +189,16 @@
   tags:
     - ontap_fc_adapters
 
-- name: FCP Adapter Settings Part II Node A - set speed 
+- name: FCP Adapter Settings Node B - admin down
   na_ontap_command:
-    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[0] }}', '-adapter', '{{ item }}', '-speed', '{{ fcp_port_speed }}', '-status-admin', 'up']"
+    command: "['fcp', 'adapter', 'modify', '-node', '{{ nodes[1] }}', '-adapter', '{{ item }}', '-status-admin', 'down']"
     hostname: "{{inventory_hostname}}"
     username: "{{username}}"
     password: "{{password}}"
     https: true
     validate_certs: false
   with_items:
-    - "{{ node_fcp_ports }}"  
+    - "{{ node_fcp_ports }}"
   when: "('fcp' in allowed_protocols)"
   tags:
     - ontap_fc_adapters
