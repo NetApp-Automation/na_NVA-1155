@@ -14,8 +14,8 @@ nodes_ip:
  - 10.61.184.195
 
 #Cluster authentification
-username: admin
-password: netapp1!
+username: username
+password: password
 
 #FCP Adapter Ports
 node_fcp_ports:
@@ -78,15 +78,15 @@ ora_svm_specs:
   - {home_port: e0M, address: 10.61.184.197, netmask: 255.255.255.0, gateway: 10.61.184.1, lif_name: ora_svm_mgmt}
 
 #Password for vsadmin user of SVMs
-vsadmin_password: NetApp!23
+vsadmin_password: password
 
 #Details for configuring NetApp AutoSupport - provide a working mailhost
 autosupport_vars:
   mail_hosts: "mailhost"
-  noteto: "admin@netapp.com"
+  noteto: "admin@domain.com"
 
-dns_server: 10.61.184.251
-dns_domain: cie.netapp.com
+dns_server: 10.10.10.100
+dns_domain: domain.com
 
 ntp_server:
   - 0.us.pool.ntp.org
