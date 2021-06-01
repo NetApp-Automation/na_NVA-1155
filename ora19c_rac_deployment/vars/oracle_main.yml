@@ -48,7 +48,7 @@ cluster_scan_ip:
   - {ip: 10.61.180.169, hostname: rtprac-scan}
 
 cluster_name: rtprac
-cluster_domain: cie.netapp.com
+cluster_domain: domain.com
 grid_cluster_nodes: b200-ora-01:b200-ora-01-vip:HUB,b200-ora-02:b200-ora-02-vip:HUB,b200-ora-03:b200-ora-03-vip:HUB,b200-ora-04:b200-ora-04-vip:HUB,b200-ora-05:b200-ora-05-vip:HUB,b200-ora-06:b200-ora-06-vip:HUB,b200-ora-07:b200-ora-07-vip:HUB,b200-ora-08:b200-ora-08-vip:HUB
 network_interface_list: ens5f0:10.61.180.0:1,ens5f1:172.21.101.0:5
 
@@ -65,7 +65,7 @@ pdb_name: pdb
 
 # CDB is created with SGA at 75% of memory_limit, MB
 memory_limit: 24576
-initial_pwd_all: NetApp#23
+initial_pwd_all: password
 
 em_configuration: DBEXPRESS
 em_express_port: 5503
